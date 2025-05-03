@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="utf-8">
+    <title>تسجيل حضور الورشة</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" type="text/css" href="css/nunito-font.css">
+    <link rel="stylesheet" href="css/style.css" />
+    <meta name="robots" content="noindex, follow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+
+    <style>
+        input,
+        select {
+            direction: rtl;
+        }
+
+        .form-row select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .register {
+            border-radius: 0 !important;
+        }
+    </style>
+</head>
+
+<body class="form-v9">
+    <div class="page-content">
+        <div class="form-v9-content" style="background-image: url('image/1.avif'); background-size: cover;">
+            <form class="form-detail" method="post" id="workshop-form">
+                <h2>تسجيل حضور الورشة</h2>
+                <div class="form-row-total">
+                    <div class="form-row-full" style="width:750px;">
+                        <input type="text" name="full-name" id="full-name" class="input-text" placeholder="الاسم الكامل"
+                            required>
+                    </div>
+                </div>
+
+                <div class="form-row-total">
+                    <div class="form-row">
+                        <input type="email" name="email" id="email" class="input-text" placeholder="البريد الإلكتروني"
+                            required>
+                    </div>
+                    <div class="form-row">
+                        <input type="tel" name="phone" id="phone" class="input-text" placeholder="رقم الجوال" required
+                            pattern="[0-9]{10,15}">
+                    </div>
+                </div>
+
+                <div class="form-row-total">
+                    <div class="form-row">
+                        <input type="text" name="idfr" id="idfr" class="input-text" placeholder="جهة العمل او الدراسة">
+                    </div>
+
+                    <div class="form-row">
+                        <select name="job" class="input-text" id="job" required>
+                            <option value="" style="color: 000;">اختر الوظيفة</option>
+                            <option value="1">طالب</option>
+                            <option value="2">خريج</option>
+                            <option value="3">موظف</option>
+                            <option value="4">اخري</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row-last">
+                    <input type="submit" id="submitBtn" name="register" class="register" value="تسجيل">
+                </div>
+            </form>
+            <script>
+                document.getElementById("workshop-form").addEventListener("submit", function (e) {
+                    e.preventDefault();
+
+                    const name = document.getElementById("full-name").value;
+                    const phone = document.getElementById("phone").value;
+                    const email = document.getElementById("email").value.trim();
+                    const job = document.getElementById("job").value;
+                    const idfr = document.getElementById("idfr").value;
+
+
+                    if (name.length < 12) {
+                        toastr.error("الاسم يجب أن يكون أكثر من 12 حرف", "تحقق من الاسم");
+                        return;
+                    }
+
+                    if (!/^[0-9]{10,15}$/.test(phone)) {
+                        toastr.error("رقم الجوال غير صحيح (يجب أن يكون من 10 إلى 15 رقم)", "تحقق من الرقم");
+                        return;
+                    }
+
+                    if (!email.includes("@") || email.length < 5) {
+                        toastr.error("البريد الإلكتروني غير صالح", "تحقق من البريد");
+                        return;
+                    }
+                    const data = {
+                        name: name,
+                        phone: phone,
+                        email: email,
+                        job: job,
+                        organization: idfr
+                    };
+
+                    console.log(data);
+
+                    const apiUrl = "https://kawader17.areez.co/api/v1/Register";
+
+                    fetch(apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    })
+                        .then(response => {
+                            if (!response.ok) throw new Error("خطأ في الاتصال بالخادم");
+                            return response.json();
+                        })
+                        .then(result => {
+                            toastr.success('تم التسجيل في الورشة بنجاح 🎉', 'نجاح');
+                            document.getElementById("workshop-form").reset();
+                        })
+                        .catch(error => {
+                            toastr.error('حدث خطأ أثناء التسجيل. حاول مرة أخرى.', 'خطأ');
+                            console.error(error);
+                        });
+                });
+            </script>
+
+        </div>
+    </div>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-23581568-13"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'UA-23581568-13');
+    </script>
+</body>
+
+</html>
