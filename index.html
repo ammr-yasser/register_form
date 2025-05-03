@@ -11,8 +11,18 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+    <script>
+        toastr.options.closeButton = true;
+        toastr.options.progressBar = true;
+        toastr.options.positionClass = "toast-bottom-left";
+        toastr.options.timeOut = 5000;
+        toastr.options.preventDuplicates = true;
+    </script>
 
 
     <style>
@@ -58,9 +68,6 @@
                 </div>
 
                 <div class="form-row-total">
-                    <div class="form-row">
-                        <input type="text" name="idfr" id="idfr" class="input-text" placeholder="جهة العمل او الدراسة">
-                    </div>
 
                     <div class="form-row">
                         <select name="job" class="input-text" id="job" required>
@@ -71,13 +78,30 @@
                             <option value="4">اخري</option>
                         </select>
                     </div>
+
+
+                    <div class="form-row">
+                        <input type="text" name="idfr" id="idfr" class="input-text" placeholder="جهة العمل او الدراسة">
+                    </div>
                 </div>
 
                 <div class="form-row-last">
-                    <input type="submit" id="submitBtn" name="register" class="register" value="تسجيل">
+                    <button type="submit" id="submitBtn" class="register"
+                        style="padding-top: 10px;padding-bottom: 10px;">
+                        <span id="loadingIcon" style="display: none; margin-left: 10px;">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </span>
+                        <span id="btnText">تسجيل</span>
+                    </button>
+
+                    <!-- <input type="submit" id="submitBtn" name="register" class="register" value="تسجيل"> -->
                 </div>
             </form>
             <script>
+                const submitBtn = document.getElementById("submitBtn");
+                const btnText = document.getElementById("btnText");
+                const loadingIcon = document.getElementById("loadingIcon");
+
                 document.getElementById("workshop-form").addEventListener("submit", function (e) {
                     e.preventDefault();
 
@@ -87,21 +111,6 @@
                     const job = document.getElementById("job").value;
                     const idfr = document.getElementById("idfr").value;
 
-
-                    if (name.length < 12) {
-                        toastr.error("الاسم يجب أن يكون أكثر من 12 حرف", "تحقق من الاسم");
-                        return;
-                    }
-
-                    if (!/^[0-9]{10,15}$/.test(phone)) {
-                        toastr.error("رقم الجوال غير صحيح (يجب أن يكون من 10 إلى 15 رقم)", "تحقق من الرقم");
-                        return;
-                    }
-
-                    if (!email.includes("@") || email.length < 5) {
-                        toastr.error("البريد الإلكتروني غير صالح", "تحقق من البريد");
-                        return;
-                    }
                     const data = {
                         name: name,
                         phone: phone,
@@ -110,7 +119,9 @@
                         organization: idfr
                     };
 
-                    console.log(data);
+                    submitBtn.disabled = true;
+                    btnText.textContent = "جاري الإرسال...";
+                    loadingIcon.style.display = "inline-block";
 
                     const apiUrl = "https://kawader17.areez.co/api/v1/Register";
 
@@ -126,14 +137,31 @@
                             return response.json();
                         })
                         .then(result => {
-                            toastr.success('تم التسجيل في الورشة بنجاح 🎉', 'نجاح');
-                            document.getElementById("workshop-form").reset();
+                            console.log(result);
+
+                            if (result.status === true) {
+                                toastr.success('تم التسجيل في الورشة بنجاح 🎉');
+                                document.getElementById("workshop-form").reset();
+                            } else {
+                                toastr.error('فشل في التسجيل. حاول مرة أخرى.');
+                            }
                         })
                         .catch(error => {
                             toastr.error('حدث خطأ أثناء التسجيل. حاول مرة أخرى.', 'خطأ');
                             console.error(error);
+                        })
+                        .finally(() => {
+                            resetButton();
                         });
+
+                    function resetButton() {
+                        submitBtn.disabled = false;
+                        btnText.textContent = "تسجيل";
+                        loadingIcon.style.display = "none";
+                    }
                 });
+
+
             </script>
 
         </div>
